@@ -45,7 +45,7 @@ public class ChunkDistributionService {
 
     private static Set<String> chooseNodesForChunk(long chunkSize, Map<String, Long> nodeToMemory) {
         if(REPLICAS > nodeToMemory.size()) {
-            throw new RuntimeException();
+            throw new RuntimeException("Not enough nodes for replication");
         }
 
         Comparator<String> comparator = Comparator.comparing(nodeToMemory::get);

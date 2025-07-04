@@ -3,6 +3,7 @@ package org.example;
 import io.etcd.jetcd.Client;
 import lombok.RequiredArgsConstructor;
 
+import java.time.Duration;
 import java.util.Scanner;
 
 @RequiredArgsConstructor
@@ -12,7 +13,12 @@ public class FileSystemCLIRunner {
 
     public static void main(String[] args) {
 
-        Client client = Client.builder().endpoints(ETCD_URI).build();
+        Client client = Client.builder()
+                .endpoints(ETCD_URI)
+                .keepaliveTime(Duration.ofSeconds(60))
+                .keepaliveTimeout(Duration.ofSeconds(20))
+                .build();
+
         NodeHttpClient nodeHttpClient = new NodeHttpClient();
         LeaderResolver leaderResolver = new LeaderResolver(client);
         CommandExecutor executor = new CommandExecutor(nodeHttpClient, leaderResolver);
@@ -92,7 +98,7 @@ public class FileSystemCLIRunner {
 
         String prefix = args[1];
 
-        return String.join("\n", executor.list(prefix));
+        return "Files with prefix \"" + prefix + "\":\n" + String.join("\n", executor.list(prefix));
     }
 
     private String quit(String[] args) {

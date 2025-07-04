@@ -28,6 +28,8 @@ public class ChunkDeletionClient {
                 .uri("/chunk/" + chunkId)
                 .retrieve()
                 .toBodilessEntity()
+                .doOnError(throwable -> log.error("delete failed: {}", throwable.getMessage()))
+                .onErrorComplete()
                 .subscribe();
     }
 }

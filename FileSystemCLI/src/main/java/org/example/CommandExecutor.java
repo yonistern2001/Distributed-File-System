@@ -7,6 +7,7 @@ import org.springframework.web.reactive.function.client.WebClientRequestExceptio
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.io.*;
+import java.nio.file.NoSuchFileException;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
@@ -40,14 +41,14 @@ public class CommandExecutor {
                 uploadChunks(chunkMapping, fileInputStream);
                 return;
 
-            } catch (WebClientRequestException ignored) {
+            } catch (WebClientRequestException | WebClientResponseException ignored) {
                 delete(targetPath);
 
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
 
-            sleep(1000);
+            sleep(2650);
         }
 
         throw new RuntimeException("Uploading chunks failed");
@@ -109,7 +110,11 @@ public class CommandExecutor {
                     return requestSender.apply(leaderAddress);
                 }
 
-            } catch (WebClientRequestException | ExecutionException ignored) {
+            } catch (WebClientRequestException | WebClientResponseException | ExecutionException e) {
+
+                if(e instanceof WebClientResponseException.NotFound) {
+                    throw new RuntimeException(e);
+                }
 
             } catch (InterruptedException ignored) {
                 Thread.currentThread().interrupt();
